@@ -1,0 +1,29 @@
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+[git_branch]
+symbol = "🌱 "
+
+[nodejs]
+symbol = "⬢ "
+
+[python]
+symbol = "🐍 "
+
+[rust]
+symbol = "🦀 "
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+
+# This prevents git info from showing in non-git directories
+[git_status]
+disabled = false
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?${count}"
+modified = "!${count}"
+staged = "+${count}"

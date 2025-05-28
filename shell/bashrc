@@ -1,1 +1,5 @@
+# Fastfetch
 [[ $- == *i* ]] && fastfetch
+
+# Starship Prompter
+eval "$(starship init bash)"
