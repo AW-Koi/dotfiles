@@ -1,6 +1,6 @@
 # My Dotfiles
 
-Personal configuration files for my Arch Linux setup with Hyprland, managed with GNU Stow.
+Personal configuration files for my Arch Linux setup with Hyprland, managed with [stow](https://www.gnu.org/software/stow/).
 
 ## 🖥️ Setup
 - **OS**: Arch Linux
