@@ -54,7 +54,6 @@ dotfiles/
 ### Waybar
 - Custom themes and scripts
 - System monitoring widgets
-- Beautiful styling with animations
 
 ### Fish Shell
 - Starship prompt integration
