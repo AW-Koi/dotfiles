@@ -2,6 +2,8 @@
 
 Personal configuration files for my Arch Linux setup with Hyprland, managed with [stow](https://www.gnu.org/software/stow/).
 
+Windows machines use the `windows` branch instead: fish and starship under msys2, installed with a PowerShell script rather than stow. Setup notes are in `windows/README.md` on that branch.
+
 ## 🖥️ Setup
 - **OS**: Arch Linux
 - **WM**: Hyprland

@@ -1,0 +1,80 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+
+format = """
+[┌─](#1a6b48)$username$hostname $directory$git_branch$git_state$git_status$dotnet$nodejs$cmd_duration
+[└](#1a6b48)$character"""
+
+right_format = '$time'
+
+[username]
+show_always = true
+style_user = 'bold #3ef08c'
+style_root = 'bold #ff6b52'
+format = '[$user]($style)'
+
+[hostname]
+ssh_only = false
+style = '#1a9c63'
+format = '[@$hostname]($style)'
+
+[directory]
+style = '#8fe6b8'
+use_os_path_sep = false
+read_only = ' [LOCKED]'
+read_only_style = '#ffb000'
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = '…/'
+format = '[$path]($style)[$read_only]($read_only_style)'
+
+[git_branch]
+symbol = ''
+style = '#ffb000'
+format = ' [⟨$branch⟩]($style)'
+
+[git_state]
+style = '#ff6b52'
+format = ' [$state $progress_current/$progress_total]($style)'
+
+[git_status]
+style = '#ff6b52'
+format = ' [$all_status$ahead_behind]($style)'
+conflicted = '!${count}'
+ahead = '↑${count}'
+behind = '↓${count}'
+diverged = '↕${ahead_count}/${behind_count}'
+untracked = '?${count}'
+stashed = '≡${count}'
+modified = '~${count}'
+staged = '+${count}'
+renamed = '»${count}'
+deleted = '-${count}'
+
+[dotnet]
+symbol = ''
+style = '#1a9c63'
+format = ' [NET $version]($style)'
+detect_extensions = ['csproj', 'sln', 'fsproj']
+
+[nodejs]
+symbol = ''
+style = '#1a9c63'
+format = ' [NODE $version]($style)'
+
+[cmd_duration]
+min_time = 2000
+style = '#ffb000'
+format = ' [+$duration]($style)'
+
+[time]
+disabled = false
+time_format = '%H:%M:%S'
+style = '#14533a'
+format = '[$time]($style)'
+
+[character]
+success_symbol = '[─▶](#3ef08c)'
+error_symbol = '[─▶](#ff6b52)'
+vimcmd_symbol = '[─◀](#ffb000)'
