@@ -41,19 +41,18 @@ format = ' [$state $progress_current/$progress_total]($style)'
 [git_status]
 format = '[$all_status$ahead_behind]($style)'
 style = '#8fe6b8'
-# Glyphs stay within Latin-1, Arrows (U+21xx) and Mathematical Operators (U+22xx),
-# which stock DejaVu Sans Mono covers. Dingbats and the U+27Ex angle brackets fall
-# back to another font in mintty and render at the wrong width.
-staged     = ' [⊕${count}](#3ef08c)'
-modified   = ' [Δ${count}](#ffb000)'
-untracked  = ' [⊘${count}](#5fb8ff)'
-deleted    = ' [⊖${count}](#ff6b52)'
-renamed    = ' [⇄${count}](#c58fff)'
-conflicted = ' [≠${count}](bold #ff6b52)'
-stashed    = ' [≡${count}](#8fe6b8)'
-ahead      = ' [↑${count}](#5fb8ff)'
-behind     = ' [↓${count}](#5fb8ff)'
-diverged   = ' [↕${ahead_count}/${behind_count}](#5fb8ff)'
+# The colon keeps the count from crowding the label. Arrows are the only symbols
+# left because their direction is unambiguous; anything else spells the state out.
+staged     = '  [STG:${count}](#3ef08c)'
+modified   = '  [MOD:${count}](#ffb000)'
+untracked  = '  [NEW:${count}](#5fb8ff)'
+deleted    = '  [DEL:${count}](#ff6b52)'
+renamed    = '  [MV:${count}](#c58fff)'
+conflicted = '  [CONFLICT:${count}](bold #ff6b52)'
+stashed    = '  [STASH:${count}](#8fe6b8)'
+ahead      = '  [↑${count}](#5fb8ff)'
+behind     = '  [↓${count}](#5fb8ff)'
+diverged   = '  [↑${ahead_count} ↓${behind_count}](#5fb8ff)'
 
 [dotnet]
 symbol = ''

@@ -3,13 +3,18 @@
 .SYNOPSIS
     Installs the Windows starship + fish configuration.
 .DESCRIPTION
-    Copies starship.toml into %USERPROFILE%\.config and installs config.fish into
-    every fish installation found. Existing files are renamed to *.backup first.
+    Copies starship.toml into %USERPROFILE%\.config and installs the fish config
+    tree into every fish installation found. Existing files are copied to *.backup
+    first. Pass -UpdateWindowsTerminal to also point the fish profile's tab icon at
+    this repo.
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     # Extra fish.exe paths to configure alongside the ones probed by default.
-    [string[]]$FishPath = @()
+    [string[]]$FishPath = @(),
+
+    # Rewrites the fish profile's icon in Windows Terminal's settings.json.
+    [switch]$UpdateWindowsTerminal
 )
 
 Set-StrictMode -Version Latest
@@ -17,9 +22,10 @@ $ErrorActionPreference = 'Stop'
 
 $repoWindowsDir = $PSScriptRoot
 $starshipSource = Join-Path $repoWindowsDir 'starship\.config\starship.toml'
-$fishSource = Join-Path $repoWindowsDir 'fish\.config\fish\config.fish'
+$fishSourceRoot = Join-Path $repoWindowsDir 'fish\.config\fish'
+$iconSource = Join-Path $repoWindowsDir 'terminal\fish.png'
 
-foreach ($required in @($starshipSource, $fishSource)) {
+foreach ($required in @($starshipSource, (Join-Path $fishSourceRoot 'config.fish'))) {
     if (-not (Test-Path -LiteralPath $required)) {
         throw "Missing repo file: $required. Run this script from a full checkout of the windows branch."
     }
@@ -104,7 +110,10 @@ foreach ($fishExe in ($candidates | Select-Object -Unique)) {
     }
 
     Write-Host "  $fishExe -> $configDir"
-    Install-ConfigFile -Source $fishSource -Destination (Join-Path $configDir 'config.fish')
+    foreach ($source in (Get-ChildItem -LiteralPath $fishSourceRoot -Recurse -File)) {
+        $relative = $source.FullName.Substring($fishSourceRoot.Length).TrimStart('\')
+        Install-ConfigFile -Source $source.FullName -Destination (Join-Path $configDir $relative)
+    }
     $configured++
 }
 
@@ -112,6 +121,66 @@ if ($configured -eq 0) {
     Write-Host "  No fish installation found. Install it with:" -ForegroundColor Yellow
     Write-Host "    pacman -S fish        # inside an msys2 shell" -ForegroundColor Yellow
     exit 1
+}
+
+function Test-HasProperty {
+    param($InputObject, [string]$Name)
+    return ($InputObject.PSObject.Properties.Name -contains $Name)
+}
+
+function Update-WindowsTerminalIcon {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param([Parameter(Mandatory = $true)][string]$IconPath)
+
+    $settings = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json'
+    if (-not (Test-Path -LiteralPath $settings)) {
+        Write-Host "  Windows Terminal settings.json not found, skipping." -ForegroundColor Yellow
+        return
+    }
+    if (-not $PSCmdlet.ShouldProcess($settings, 'Set fish profile icon')) { return }
+
+    $config = Get-Content -Raw -LiteralPath $settings | ConvertFrom-Json
+    if (-not (Test-HasProperty $config 'profiles') -or -not (Test-HasProperty $config.profiles 'list')) {
+        Write-Host "  settings.json has no profiles.list, skipping." -ForegroundColor Yellow
+        return
+    }
+
+    $matched = 0
+    foreach ($wtProfile in $config.profiles.list) {
+        $name = ''
+        if (Test-HasProperty $wtProfile 'name') { $name = [string]$wtProfile.name }
+        $commandline = ''
+        if (Test-HasProperty $wtProfile 'commandline') { $commandline = [string]$wtProfile.commandline }
+
+        if ($name -notmatch 'fish' -and $commandline -notmatch 'fish') { continue }
+
+        $wtProfile | Add-Member -NotePropertyName 'icon' -NotePropertyValue $IconPath -Force
+        Write-Host "  icon set on profile '$name'" -ForegroundColor Green
+        $matched++
+    }
+
+    if ($matched -eq 0) {
+        Write-Host "  No fish profile in Windows Terminal, skipping." -ForegroundColor Yellow
+        return
+    }
+
+    Copy-Item -LiteralPath $settings -Destination "$settings.backup" -Force
+    Write-Host "  backed up  $settings.backup" -ForegroundColor Yellow
+
+    # Windows Terminal rejects a BOM, and Set-Content -Encoding utf8 writes one on 5.1.
+    $json = $config | ConvertTo-Json -Depth 100
+    [System.IO.File]::WriteAllText($settings, $json, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "  updated    $settings" -ForegroundColor Green
+}
+
+if ($UpdateWindowsTerminal) {
+    Write-Host "`nWindows Terminal" -ForegroundColor Cyan
+    if (-not (Test-Path -LiteralPath $iconSource)) {
+        Write-Host "  $iconSource is missing. Run terminal\generate-icon.ps1 first." -ForegroundColor Yellow
+    }
+    else {
+        Update-WindowsTerminalIcon -IconPath (Resolve-Path -LiteralPath $iconSource).Path
+    }
 }
 
 Write-Host "`nDone. Open a new fish shell to pick up the prompt.`n" -ForegroundColor Cyan

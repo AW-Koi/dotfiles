@@ -10,7 +10,7 @@ The prompt is a green-phosphor terminal theme: three shades of green for normal
 state, amber for anything that needs attention, and red when a command fails.
 
 ```
-┌─ahwoouser@AHWOO-01 …/AhwooClient «task/brand-pages» Δ3 ⊕1 ⊘2 NODE v24.8.0     11:42:44
+┌─ahwoouser@AHWOO-01 …/AhwooClient «task/brand-pages»  MOD:3  STG:1  NEW:2     11:42:44
 └─▶
 ```
 
@@ -26,10 +26,12 @@ state, amber for anything that needs attention, and red when a command fails.
 ```
 dotfiles/
 ├── windows/
-│   ├── install.ps1                    # copies configs into place
-│   ├── starship/.config/starship.toml # prompt theme
-│   └── fish/.config/fish/config.fish  # greeting off, starship init
-└── hypr/ waybar/ kitty/ shell/ fish/  # Arch config, inherited from main
+│   ├── install.ps1                                  # copies configs into place
+│   ├── starship/.config/starship.toml               # prompt theme
+│   ├── fish/.config/fish/config.fish                # greeting off, starship init
+│   ├── fish/.config/fish/functions/fish_title.fish  # terminal tab text
+│   └── terminal/                                    # tab icon + its generator
+└── hypr/ waybar/ kitty/ shell/ fish/                # Arch config, from main
 ```
 
 The `package/.config/...` nesting mirrors the stow layout on `main` so both branches
@@ -62,7 +64,27 @@ To add a fish that lives somewhere unusual:
 | Repo file | Destination |
 | --- | --- |
 | `windows/starship/.config/starship.toml` | `%USERPROFILE%\.config\starship.toml` |
-| `windows/fish/.config/fish/config.fish` | whatever `$__fish_config_dir` reports, per fish install |
+| everything under `windows/fish/.config/fish/` | whatever `$__fish_config_dir` reports, per fish install |
+
+## Windows Terminal
+
+The tab title comes from `fish_title`, which prints the current directory's name.
+Fish's default prints `prompt_pwd`, which renders as `/c/A/D/AhwooClient` and is
+illegible at tab width.
+
+The tab icon is `terminal/fish.png`, drawn to match the prompt. To point the fish
+profile at it:
+
+```powershell
+.\install.ps1 -UpdateWindowsTerminal
+```
+
+That rewrites `icon` on any profile whose name or command line mentions fish, backing
+up `settings.json` first. It stores an absolute path, so keep the repo somewhere
+permanent (`%USERPROFILE%\dotfiles`) rather than a temp directory.
+
+`terminal/generate-icon.ps1` redraws the PNG from GDI+ primitives if you want to
+change the colours or the shape.
 
 ## Where fish reads its config
 
@@ -90,21 +112,22 @@ as part of the token, so a CRLF checkout of `config.fish` breaks the shell.
 
 ## Reading the prompt
 
-Each git status type gets its own glyph and its own colour, so you can read the
-state without counting positions.
+Git status spells each state out rather than encoding it in a symbol, since an
+abstract glyph can't tell you whether it means untracked or unstaged. Each label
+also gets its own colour.
 
-| Glyph | Meaning | Colour |
+| Label | Meaning | Colour |
 | --- | --- | --- |
-| `Δ3` | modified | amber |
-| `⊕1` | staged | green |
-| `⊘2` | untracked | blue |
-| `⊖1` | deleted | red |
-| `⇄1` | renamed | purple |
-| `≠1` | conflicted | bold red |
-| `≡2` | stashed | pale green |
-| `↑2` `↓1` `↕2/1` | ahead, behind, diverged from upstream | blue |
+| `MOD:3` | modified | amber |
+| `STG:1` | staged | green |
+| `NEW:2` | untracked | blue |
+| `DEL:1` | deleted | red |
+| `MV:1` | renamed | purple |
+| `CONFLICT:1` | conflicted | bold red |
+| `STASH:2` | stashed | pale green |
+| `↑2` `↓1` | ahead of, behind upstream | blue |
 
-`⊕` and `⊖` are added and removed, `Δ` is changed, `⊘` is not yet tracked.
+Arrows are the only symbols left, because a direction needs no legend.
 
 Everything else on the line:
 
