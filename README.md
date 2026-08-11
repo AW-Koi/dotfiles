@@ -10,7 +10,7 @@ The prompt is a green-phosphor terminal theme: three shades of green for normal
 state, amber for anything that needs attention, and red when a command fails.
 
 ```
-┌─ahwoouser@AHWOO-01 …/AhwooClient ⟨task/brand-pages⟩ ~3 +1 NODE v24.8.0        11:42:44
+┌─ahwoouser@AHWOO-01 …/AhwooClient «task/brand-pages» Δ3 ⊕1 ⊘2 NODE v24.8.0     11:42:44
 └─▶
 ```
 
@@ -90,11 +90,27 @@ as part of the token, so a CRLF checkout of `config.fish` breaks the shell.
 
 ## Reading the prompt
 
+Each git status type gets its own glyph and its own colour, so you can read the
+state without counting positions.
+
+| Glyph | Meaning | Colour |
+| --- | --- | --- |
+| `Δ3` | modified | amber |
+| `⊕1` | staged | green |
+| `⊘2` | untracked | blue |
+| `⊖1` | deleted | red |
+| `⇄1` | renamed | purple |
+| `≠1` | conflicted | bold red |
+| `≡2` | stashed | pale green |
+| `↑2` `↓1` `↕2/1` | ahead, behind, diverged from upstream | blue |
+
+`⊕` and `⊖` are added and removed, `Δ` is changed, `⊘` is not yet tracked.
+
+Everything else on the line:
+
 | Element | Meaning |
 | --- | --- |
-| `~3` `+1` `?2` | modified, staged, untracked file counts |
-| `↑2` `↓1` `↕2/1` | ahead, behind, diverged from upstream |
-| `≡2` | stashes |
+| `«branch»` | current branch |
 | `+4s` | last command's runtime, shown past 2s only |
 | red `─▶` | last command exited non-zero |
 | `NODE` / `NET` | only appear in directories with those projects |
@@ -104,3 +120,9 @@ as part of the token, so a CRLF checkout of `config.fish` breaks the shell.
 Everything renders in stock DejaVu Sans Mono, which mintty ships with, so you don't
 need a Nerd Font here. The `main` config does use Nerd Font glyphs throughout. If you
 want the icon versions, take the symbols from `shell/.config/starship.toml` on `main`.
+
+Keeping that true constrains which glyphs the prompt can use. Box Drawing, Latin-1,
+Arrows (U+21xx), and Mathematical Operators (U+22xx) are all covered. Dingbats
+(`✓`, `✘`) and the U+27Ex angle brackets are not, and mintty silently substitutes them
+from another font at a different width, which shifts the rest of the line. If you
+swap a glyph, pick one from a covered block.
