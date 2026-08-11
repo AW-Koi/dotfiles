@@ -110,7 +110,11 @@ foreach ($fishExe in ($candidates | Select-Object -Unique)) {
     }
 
     Write-Host "  $fishExe -> $configDir"
-    foreach ($source in (Get-ChildItem -LiteralPath $fishSourceRoot -Recurse -File)) {
+    # .gitignore lives in the repo tree to keep fish_variables out of git. It is not
+    # part of the config and must not be copied into the live config dir.
+    $sources = Get-ChildItem -LiteralPath $fishSourceRoot -Recurse -File |
+        Where-Object { $_.Name -ne '.gitignore' }
+    foreach ($source in $sources) {
         $relative = $source.FullName.Substring($fishSourceRoot.Length).TrimStart('\')
         Install-ConfigFile -Source $source.FullName -Destination (Join-Path $configDir $relative)
     }
