@@ -1,0 +1,25 @@
+# Shared git settings for every machine. Not installed into place: ~/.gitconfig
+# includes this file, so machine-local entries (safe.directory, credential
+# helpers, per-repo identities) stay out of the repo. install.sh adds the
+# include line.
+[user]
+	name = AW-Koi
+	email = max.kooij@ahwoo.com
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[fetch]
+	prune = true
+
+[diff]
+	algorithm = histogram
+
+[branch]
+	sort = -committerdate

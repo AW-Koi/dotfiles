@@ -1,0 +1,6 @@
+# LF everywhere, on every platform. fish parses a trailing CR as part of the token,
+# and a CRLF shebang line makes the kernel report a bad interpreter, so a CRLF
+# checkout breaks these configs outright rather than cosmetically.
+* text=auto eol=lf
+
+*.png binary

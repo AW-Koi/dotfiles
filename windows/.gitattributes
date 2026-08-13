@@ -1,8 +1,0 @@
-# fish parses a trailing CR as part of the token, so these must stay LF on checkout
-# even though core.autocrlf is usually true on Windows.
-*.fish text eol=lf
-*.toml text eol=lf
-
-*.ps1 text eol=crlf
-*.md text eol=lf
-*.png binary
